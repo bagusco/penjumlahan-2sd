@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Penjumlahan - Matematika Kelas 2 SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            user-select: none;
+        }
+        .btn-bounce:active {
+            transform: scale(0.92);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+        .card-number {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), inset 0 -4px 0 0 #cbd5e1;
+        }
+        .pulse-star {
+            animation: pulseStar 1.5s infinite alternate;
+        }
+        @keyframes pulseStar {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15) rotate(5deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- Header & Scoreboard -->
+    <header class="max-w-4xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-amber-500/30">
+                🦁
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-300 tracking-wide">Jago Penjumlahan!</h1>
+                <p class="text-xs sm:text-sm text-slate-300">Belajar Berhitung Maksimal Total 100 (Kelas 2 SD)</p>
+            </div>
+        </div>
+
+        <!-- Star & Score Counter -->
+        <div class="flex items-center space-x-3 bg-slate-800/90 px-4 py-2 rounded-2xl border border-slate-700 shadow-md">
+            <div class="flex items-center space-x-1.5">
+                <span class="text-2xl pulse-star">⭐</span>
+                <span id="score-stars" class="text-xl font-bold text-amber-400">0</span>
+            </div>
+            <div class="h-6 w-0.5 bg-slate-700"></div>
+            <div class="flex items-center space-x-1.5">
+                <span class="text-xl">🔥</span>
+                <span id="score-streak" class="text-base font-bold text-orange-400">0 Seri</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="max-w-4xl mx-auto w-full flex-grow flex flex-col justify-center">
+
+        <!-- Level Selector Tabs -->
+        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+            <button onclick="selectLevel(1)" id="lvl-btn-1" class="py-3 px-2 rounded-2xl text-xs sm:text-sm font-bold border-2 transition-all duration-200 btn-bounce bg-emerald-500 border-emerald-300 text-white shadow-lg shadow-emerald-500/30">
+                🌱 Level 1<br><span class="text-[10px] sm:text-xs font-normal">Tanpa Menyimpan</span>
+            </button>
+            <button onclick="selectLevel(2)" id="lvl-btn-2" class="py-3 px-2 rounded-2xl text-xs sm:text-sm font-bold border-2 transition-all duration-200 btn-bounce bg-slate-800 border-slate-700 text-slate-400 hover:text-white">
+                🚀 Level 2<br><span class="text-[10px] sm:text-xs font-normal">Dengan Menyimpan</span>
+            </button>
+            <button onclick="selectLevel(3)" id="lvl-btn-3" class="py-3 px-2 rounded-2xl text-xs sm:text-sm font-bold border-2 transition-all duration-200 btn-bounce bg-slate-800 border-slate-700 text-slate-400 hover:text-white">
+                👑 Level 3<br><span class="text-[10px] sm:text-xs font-normal">Campuran Acak</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Problem Card & Display (7 Cols) -->
+            <div class="lg:col-span-7 glass-panel rounded-3xl p-6 flex flex-col items-center justify-between min-h-[420px] shadow-2xl relative overflow-hidden">
+                
+                <!-- Helper Toggles -->
+                <div class="w-full flex items-center justify-between mb-4">
+                    <span id="level-badge" class="px-3 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-full border border-indigo-500/30">
+                        Level 1: Tanpa Menyimpan
+                    </span>
+                    <button onclick="toggleVisualAid()" class="px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-full border border-amber-500/30 transition-colors flex items-center gap-1">
+                        💡 <span id="visual-btn-text">Lihat Gambar Balok</span>
+                    </button>
+                </div>
+
+                <!-- Equation Area -->
+                <div class="flex items-center justify-center space-x-3 sm:space-x-5 my-6">
+                    <!-- Num 1 -->
+                    <div class="w-20 h-24 sm:w-24 sm:h-28 card-number rounded-2xl flex items-center justify-center text-4xl sm:text-5xl font-black text-slate-800 border-2 border-slate-300">
+                        <span id="num1">24</span>
+                    </div>
+
+                    <!-- Plus Sign -->
+                    <span class="text-4xl sm:text-5xl font-black text-amber-400">+</span>
+
+                    <!-- Num 2 -->
+                    <div class="w-20 h-24 sm:w-24 sm:h-28 card-number rounded-2xl flex items-center justify-center text-4xl sm:text-5xl font-black text-slate-800 border-2 border-slate-300">
+                        <span id="num2">15</span>
+                    </div>
+
+                    <!-- Equals Sign -->
+                    <span class="text-4xl sm:text-5xl font-black text-amber-400">=</span>
+
+                    <!-- Answer Box -->
+                    <div id="answer-box" class="w-24 h-24 sm:w-28 sm:h-28 bg-indigo-950/80 rounded-2xl border-4 border-dashed border-indigo-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-indigo-300 shadow-inner">
+                        <span id="user-input">?</span>
+                    </div>
+                </div>
+
+                <!-- Visual Blocks Helper Container (Hidden by Default) -->
+                <div id="visual-aid-box" class="hidden w-full bg-slate-900/90 rounded-2xl p-4 border border-slate-700 my-2 space-y-3">
+                    <div class="text-xs font-bold text-amber-300 flex justify-between">
+                        <span>Bantuan Visual Puluhan (🟦 = 10) & Satuan (🟨 = 1)</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <!-- Visual Num1 -->
+                        <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-400 block font-bold mb-1" id="vis-label-1">24:</span>
+                            <div id="vis-blocks-1" class="flex flex-wrap gap-1"></div>
+                        </div>
+                        <!-- Visual Num2 -->
+                        <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+                            <span class="text-slate-400 block font-bold mb-1" id="vis-label-2">15:</span>
+                            <div id="vis-blocks-2" class="flex flex-wrap gap-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cara Bersusun Modal/Hint Toggle -->
+                <div class="w-full mt-2">
+                    <button onclick="toggleVerticalHint()" class="w-full py-2 bg-slate-800 hover:bg-slate-700/80 text-slate-300 rounded-xl text-xs font-bold border border-slate-700 transition-colors flex items-center justify-center gap-2">
+                        <span>📝 Bantuan Cara Penjumlahan Bersusun</span>
+                    </button>
+
+                    <!-- Vertical Hint Container -->
+                    <div id="vertical-hint-box" class="hidden mt-3 p-4 bg-slate-900/95 rounded-2xl border border-indigo-500/40 text-center font-mono">
+                        <p class="text-xs text-indigo-300 font-sans font-bold mb-3">Penjumlahan Bersusun Pendek:</p>
+                        
+                        <!-- Grid Penjumlahan Presisi (Sejajar Puluhan & Satuan) -->
+                        <div class="inline-grid grid-cols-[40px_52px_52px] items-center text-center font-bold text-white my-1">
+                            <!-- Header Row -->
+                            <div></div>
+                            <div class="text-slate-400 text-xs font-sans pb-1">Puluhan</div>
+                            <div class="text-slate-400 text-xs font-sans pb-1">Satuan</div>
+
+                            <!-- Carry Row (Simpanan) -->
+                            <div id="hint-carry-row" class="col-span-3 grid grid-cols-[40px_52px_52px] items-center hidden my-1">
+                                <div class="text-[10px] text-amber-400 font-sans font-bold text-right pr-1">simpan</div>
+                                <div class="flex justify-center">
+                                    <span id="hint-carry-val" class="text-amber-300 text-xs font-bold bg-amber-500/30 border border-amber-400/50 rounded-full w-5 h-5 flex items-center justify-center">1</span>
+                                </div>
+                                <div></div>
+                            </div>
+
+                            <!-- Num 1 Row -->
+                            <div></div>
+                            <div id="v-num1-tens" class="text-emerald-300 text-2xl font-black py-0.5">2</div>
+                            <div id="v-num1-ones" class="text-emerald-300 text-2xl font-black py-0.5">4</div>
+
+                            <!-- Num 2 Row -->
+                            <div class="text-amber-400 font-sans font-black text-2xl text-right pr-2">+</div>
+                            <div id="v-num2-tens" class="text-emerald-300 text-2xl font-black py-0.5">1</div>
+                            <div id="v-num2-ones" class="text-emerald-300 text-2xl font-black py-0.5">5</div>
+
+                            <!-- Line Divider -->
+                            <div class="col-span-3 border-b-4 border-slate-400 my-1 rounded-full"></div>
+
+                            <!-- Result Row -->
+                            <div></div>
+                            <div id="v-res-tens" class="text-amber-300 text-2xl font-black py-0.5">3</div>
+                            <div id="v-res-ones" class="text-amber-300 text-2xl font-black py-0.5">9</div>
+                        </div>
+
+                        <div class="mt-3 text-[11px] font-sans text-slate-300 text-left bg-indigo-950/50 p-2.5 rounded-xl border border-indigo-900/50 space-y-1">
+                            <p>1️⃣ Hitung angka <strong>Satuan (Kanan)</strong> dulu: <span id="hint-step-1" class="text-amber-300 font-bold">4 + 5 = 9</span></p>
+                            <p>2️⃣ Hitung angka <strong>Puluhan (Kiri)</strong>: <span id="hint-step-2" class="text-amber-300 font-bold">2 + 1 = 3</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Toast -->
+                <div id="feedback-banner" class="hidden absolute inset-x-4 top-4 p-4 rounded-2xl text-center font-bold text-lg shadow-xl animate-bounce z-20"></div>
+
+            </div>
+
+            <!-- Custom Interactive Keypad (5 Cols) -->
+            <div class="lg:col-span-5 glass-panel rounded-3xl p-5 shadow-2xl flex flex-col justify-between space-y-4">
+                <div class="text-center">
+                    <h3 class="text-sm font-bold text-slate-300">Tekan Angka Jawabanmu:</h3>
+                </div>
+
+                <!-- Keypad Grid -->
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="appendDigit('1')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">1</button>
+                    <button onclick="appendDigit('2')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">2</button>
+                    <button onclick="appendDigit('3')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">3</button>
+
+                    <button onclick="appendDigit('4')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">4</button>
+                    <button onclick="appendDigit('5')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">5</button>
+                    <button onclick="appendDigit('6')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">6</button>
+
+                    <button onclick="appendDigit('7')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">7</button>
+                    <button onclick="appendDigit('8')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">8</button>
+                    <button onclick="appendDigit('9')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">9</button>
+
+                    <button onclick="clearInput()" class="h-16 rounded-2xl bg-rose-900/80 hover:bg-rose-800 text-rose-200 font-bold text-lg border-2 border-rose-700 shadow-md transition-all btn-bounce">⌫ Hapus</button>
+                    <button onclick="appendDigit('0')" class="h-16 rounded-2xl bg-slate-800 hover:bg-slate-700 active:bg-indigo-600 text-white font-black text-2xl border-2 border-slate-700 shadow-md transition-all btn-bounce">0</button>
+                    <button onclick="checkAnswer()" class="h-16 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-lg border-2 border-emerald-400 shadow-lg shadow-emerald-500/30 transition-all btn-bounce">🌟 CEK</button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center py-4 mt-6 text-xs text-slate-400 border-t border-slate-800">
+        <p>© 2026 Petualangan Matematika Kelas 2 SD • Belajar Penjumlahan Seru & Interaktif</p>
+    </footer>
+
+    <!-- AUDIO & JAVASCRIPT LOGIC -->
+    <script>
+        // Game State
+        let currentLevel = 1;
+        let num1 = 0;
+        let num2 = 0;
+        let correctAnswer = 0;
+        let userInputStr = "";
+        let stars = 0;
+        let streak = 0;
+        let isAnswerSubmitted = false;
+
+        // Sound Generator (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, duration = 0.15, type = 'sine') {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 0.1); // C5
+            setTimeout(() => playTone(659.25, 0.1), 100); // E5
+            setTimeout(() => playTone(783.99, 0.2), 200); // G5
+        }
+
+        function playErrorSound() {
+            playTone(220, 0.15, 'sawtooth'); // A3
+            setTimeout(() => playTone(180, 0.25, 'sawtooth'), 150);
+        }
+
+        // Initialize App
+        window.onload = function() {
+            generateQuestion();
+            setupKeyboardListeners();
+        };
+
+        function selectLevel(lvl) {
+            currentLevel = lvl;
+            playTone(440, 0.08);
+
+            // Update UI buttons
+            [1, 2, 3].forEach(i => {
+                let btn = document.getElementById(`lvl-btn-${i}`);
+                if (i === lvl) {
+                    btn.className = "py-3 px-2 rounded-2xl text-xs sm:text-sm font-bold border-2 transition-all duration-200 btn-bounce bg-emerald-500 border-emerald-300 text-white shadow-lg shadow-emerald-500/30";
+                } else {
+                    btn.className = "py-3 px-2 rounded-2xl text-xs sm:text-sm font-bold border-2 transition-all duration-200 btn-bounce bg-slate-800 border-slate-700 text-slate-400 hover:text-white";
+                }
+            });
+
+            const badge = document.getElementById('level-badge');
+            if (lvl === 1) badge.innerText = "Level 1: Tanpa Menyimpan";
+            else if (lvl === 2) badge.innerText = "Level 2: Dengan Menyimpan";
+            else badge.innerText = "Level 3: Campuran Acak";
+
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            isAnswerSubmitted = false;
+            userInputStr = "";
+            updateInputDisplay();
+
+            let n1 = 0, n2 = 0;
+
+            if (currentLevel === 1) {
+                // Tanpa Menyimpan (Satuan1 + Satuan2 < 10) & (Total <= 100)
+                do {
+                    let tens1 = Math.floor(Math.random() * 8) + 1; // 1-8
+                    let ones1 = Math.floor(Math.random() * 8);     // 0-7
+
+                    let tens2 = Math.floor(Math.random() * (9 - tens1)) + 1;
+                    let ones2 = Math.floor(Math.random() * (9 - ones1));
+
+                    n1 = tens1 * 10 + ones1;
+                    n2 = tens2 * 10 + ones2;
+                } while (n1 + n2 > 100 || n1 === 0 || n2 === 0);
+
+            } else if (currentLevel === 2) {
+                // Dengan Menyimpan (Satuan1 + Satuan2 >= 10) & (Total <= 100)
+                do {
+                    n1 = Math.floor(Math.random() * 70) + 12; // 12-82
+                    n2 = Math.floor(Math.random() * (98 - n1)) + 9;
+                } while ((n1 % 10) + (n2 % 10) < 10 || n1 + n2 > 100);
+
+            } else {
+                // Campuran Acak Total <= 100
+                do {
+                    n1 = Math.floor(Math.random() * 75) + 5;
+                    n2 = Math.floor(Math.random() * (99 - n1)) + 5;
+                } while (n1 + n2 > 100);
+            }
+
+            num1 = n1;
+            num2 = n2;
+            correctAnswer = num1 + num2;
+
+            document.getElementById('num1').innerText = num1;
+            document.getElementById('num2').innerText = num2;
+
+            renderVisualAid();
+            renderVerticalHint();
+        }
+
+        // Keypad Interactions
+        function appendDigit(digit) {
+            if (isAnswerSubmitted) return;
+            if (userInputStr.length >= 3) return;
+
+            playTone(350 + (parseInt(digit) * 30), 0.05);
+            userInputStr += digit;
+            updateInputDisplay();
+        }
+
+        function clearInput() {
+            if (isAnswerSubmitted) return;
+            playTone(250, 0.08);
+            userInputStr = "";
+            updateInputDisplay();
+        }
+
+        function updateInputDisplay() {
+            const display = document.getElementById('user-input');
+            const box = document.getElementById('answer-box');
+            
+            if (userInputStr === "") {
+                display.innerText = "?";
+                box.className = "w-24 h-24 sm:w-28 sm:h-28 bg-indigo-950/80 rounded-2xl border-4 border-dashed border-indigo-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-indigo-300 shadow-inner";
+            } else {
+                display.innerText = userInputStr;
+                box.className = "w-24 h-24 sm:w-28 sm:h-28 bg-indigo-600 rounded-2xl border-4 border-amber-400 flex items-center justify-center text-4xl sm:text-5xl font-black text-white shadow-xl";
+            }
+        }
+
+        // Answer Validation
+        function checkAnswer() {
+            if (userInputStr === "" || isAnswerSubmitted) return;
+
+            const userVal = parseInt(userInputStr);
+            isAnswerSubmitted = true;
+
+            if (userVal === correctAnswer) {
+                // Correct Answer!
+                playSuccessSound();
+                stars += 1;
+                streak += 1;
+
+                if (streak % 3 === 0) {
+                    confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                }
+
+                showFeedbackBanner(true, getPraiseMessage());
+                updateScoreboard();
+
+                setTimeout(() => {
+                    hideFeedbackBanner();
+                    generateQuestion();
+                }, 1600);
+
+            } else {
+                // Wrong Answer
+                playErrorSound();
+                streak = 0;
+                updateScoreboard();
+
+                showFeedbackBanner(false, `Coba lagi ya! ${num1} + ${num2} = ${correctAnswer}`);
+
+                setTimeout(() => {
+                    hideFeedbackBanner();
+                    isAnswerSubmitted = false;
+                    clearInput();
+                }, 2200);
+            }
+        }
+
+        function getPraiseMessage() {
+            const msgs = [
+                "🎉 YAY! JAWABANMU BENAR!",
+                "⭐ HEBAT SEKALI!",
+                "🚀 PINTAR! LANJUTKAN!",
+                "🦁 LUAR BIASA!",
+                "🏆 KAMU JAGO MATEMATIKA!"
+            ];
+            return msgs[Math.floor(Math.random() * msgs.length)];
+        }
+
+        function showFeedbackBanner(isCorrect, message) {
+            const banner = document.getElementById('feedback-banner');
+            banner.innerText = message;
+            banner.classList.remove('hidden');
+
+            if (isCorrect) {
+                banner.className = "absolute inset-x-4 top-4 p-4 rounded-2xl text-center font-bold text-lg sm:text-xl shadow-xl animate-bounce z-20 bg-emerald-500 text-white border-2 border-emerald-300";
+            } else {
+                banner.className = "absolute inset-x-4 top-4 p-4 rounded-2xl text-center font-bold text-base sm:text-lg shadow-xl z-20 bg-rose-600 text-white border-2 border-rose-300";
+            }
+        }
+
+        function hideFeedbackBanner() {
+            document.getElementById('feedback-banner').classList.add('hidden');
+        }
+
+        function updateScoreboard() {
+            document.getElementById('score-stars').innerText = stars;
+            document.getElementById('score-streak').innerText = `${streak} Seri`;
+        }
+
+        // Visual Aid Generator (Tens Sticks & Ones Cubes)
+        function renderVisualAid() {
+            const container1 = document.getElementById('vis-blocks-1');
+            const container2 = document.getElementById('vis-blocks-2');
+            
+            document.getElementById('vis-label-1').innerText = `${num1}: (${Math.floor(num1/10)} Puluhan, ${num1%10} Satuan)`;
+            document.getElementById('vis-label-2').innerText = `${num2}: (${Math.floor(num2/10)} Puluhan, ${num2%10} Satuan)`;
+
+            container1.innerHTML = buildBlocksHTML(num1);
+            container2.innerHTML = buildBlocksHTML(num2);
+        }
+
+        function buildBlocksHTML(n) {
+            let tens = Math.floor(n / 10);
+            let ones = n % 10;
+            let html = '';
+
+            // Draw Tens Bars (🟦)
+            for (let i = 0; i < tens; i++) {
+                html += `<span class="inline-block px-1.5 py-0.5 bg-blue-600 text-white font-mono rounded text-[10px] font-bold border border-blue-400">10</span>`;
+            }
+            // Draw Ones Cubes (🟨)
+            for (let i = 0; i < ones; i++) {
+                html += `<span class="inline-block w-4 h-4 bg-amber-400 rounded border border-amber-300"></span>`;
+            }
+            return html;
+        }
+
+        function toggleVisualAid() {
+            const box = document.getElementById('visual-aid-box');
+            const btnText = document.getElementById('visual-btn-text');
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+                btnText.innerText = "Sembunyikan Gambar";
+            } else {
+                box.classList.add('hidden');
+                btnText.innerText = "Lihat Gambar Balok";
+            }
+        }
+
+        // Vertical Addition Hint Helper (Cara Bersusun)
+        function renderVerticalHint() {
+            let tens1 = Math.floor(num1 / 10);
+            let ones1 = num1 % 10;
+            let tens2 = Math.floor(num2 / 10);
+            let ones2 = num2 % 10;
+
+            document.getElementById('v-num1-tens').innerText = tens1;
+            document.getElementById('v-num1-ones').innerText = ones1;
+            document.getElementById('v-num2-tens').innerText = tens2;
+            document.getElementById('v-num2-ones').innerText = ones2;
+
+            let onesSum = ones1 + ones2;
+            let hasCarry = onesSum >= 10;
+
+            const carryRow = document.getElementById('hint-carry-row');
+            if (hasCarry) {
+                carryRow.classList.remove('hidden');
+                document.getElementById('hint-carry-val').innerText = "1";
+            } else {
+                carryRow.classList.add('hidden');
+            }
+
+            document.getElementById('hint-step-1').innerText = `${ones1} + ${ones2} = ${onesSum}` + (hasCarry ? ` (tulis ${onesSum%10}, simpan 1)` : '');
+            
+            let tensSum = tens1 + tens2 + (hasCarry ? 1 : 0);
+            document.getElementById('hint-step-2').innerText = hasCarry 
+                ? `${tens1} + ${tens2} + 1 (simpanan) = ${tensSum}`
+                : `${tens1} + ${tens2} = ${tensSum}`;
+
+            document.getElementById('v-res-tens').innerText = tensSum;
+            document.getElementById('v-res-ones').innerText = onesSum % 10;
+        }
+
+        function toggleVerticalHint() {
+            const box = document.getElementById('vertical-hint-box');
+            if (box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        // Physical Keyboard Support (Numpad & Enter)
+        function setupKeyboardListeners() {
+            window.addEventListener('keydown', (e) => {
+                if (e.key >= '0' && e.key <= '9') {
+                    appendDigit(e.key);
+                } else if (e.key === 'Backspace') {
+                    clearInput();
+                } else if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
